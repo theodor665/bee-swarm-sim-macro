@@ -1,86 +1,56 @@
-#Requires AutoHotkey v2.0
-#SingleInstance Force
-SetTitleMatchMode 2
-CoordMode "Mouse", "Screen"
+# Bee Swarm Simulation Macro
 
-global MacroEnabled := false
+This repository contains a more complete AutoHotkey template for a Bee Swarm Simulator-style automation loop.
 
-; Update these values to fit your setup.
-; The window title should match the game client (example: "Roblox").
-; The key presses are placeholders and can be adjusted to your gameplay flow.
-global GameWindowTitle := "Roblox"
-global ClickDelayMin := 150
-global ClickDelayMax := 420
-global FieldCycleDelayMin := 1500
-global FieldCycleDelayMax := 3500
+Included files
+- `bee_swarm_macro.ahk` — a toggled macro with settings UI, random movement, action keys, and timing controls
+- `README.md` — quick setup and customization notes
 
-^!m::ToggleMacro()
+Important notes
+- This is a template, not a guaranteed working script for every screen layout, game build, or client setup.
+- You may need to adjust the window title, click coordinates, and keybinds to match the exact gameplay flow you want.
+- Use only on machines and accounts you own and are allowed to automate.
+- This script is meant to be an example foundation for your own workflow.
 
-ToggleMacro() {
-    global MacroEnabled
-    MacroEnabled := !MacroEnabled
+How to use
+1. Install AutoHotkey v2 from https://www.autohotkey.com/
+2. Open `bee_swarm_macro.ahk` with AutoHotkey.
+3. Edit the values near the top of the script:
+   - `GameWindowTitle`
+   - `CollectionPoints`
+   - `FieldPoints`
+   - `ActionKeys`
+   - timing values such as `MinActionDelayMs` and `MaxFieldDelayMs`
+4. Press `Ctrl + Alt + M` to toggle the macro on/off.
+5. Press `Ctrl + Alt + S` to open the settings window.
 
-    if (MacroEnabled) {
-        TrayTip "Bee Swarm Macro", "Enabled — press Ctrl+Alt+M to stop.", 10, 1
-        SetTimer RunMacroLoop, 250
-    } else {
-        TrayTip "Bee Swarm Macro", "Disabled.", 10, 1
-        SetTimer RunMacroLoop, 0
-    }
-}
+What the script does
+- focuses the game window when enabled
+- picks random collection positions and clicks them
+- sends random action keys such as `e`, `q`, `g`, and `f`
+- cycles through field points to simulate active play
+- uses randomized timing to make the loop look more natural
+- exposes a small settings panel for tweaking the base loop
 
-RunMacroLoop() {
-    global MacroEnabled
-    if (!MacroEnabled) {
-        return
-    }
+Recommended workflow for adaptation
+- Replace or expand `CollectionPoints` and `FieldPoints` with your actual in-game click positions.
+- Replace `ActionKeys` with the keys you use for harvesting, traversing, or interacting with the game.
+- Tune the delays to avoid too-fast or too-robotic actions.
+- If your game uses different keybindings or windows, update those before running the script.
 
-    ; Activate the game window if it is open.
-    if (WinExist(GameWindowTitle)) {
-        WinActivate(GameWindowTitle)
-        WinWaitActive(GameWindowTitle, , 2)
-    }
+This project is intentionally a flexible starter and should be adjusted to your exact setup before use.
 
-    ; Example macro flow:
-    ; 1) move to a collection point
-    DoRandomClick(560, 310)
-    Sleep RandomBetween(350, 900)
+Example quick-start edits
+- `GameWindowTitle := "Roblox"`
+- `CollectionPoints := [[560, 310], [700, 300], [820, 260]]`
+- `ActionKeys := ["{e}", "{q}", "{g}"]`
+- `MinFieldDelayMs := 1100`
+- `MaxFieldDelayMs := 2600`
 
-    ; 2) trigger a custom action / collect key
-    SendInput "{e}"
-    Sleep RandomBetween(250, 600)
+If you want a more specialized setup later, this template can be expanded to support:
+- auto-harvesting loops
+- auto-egg collection
+- field switching
+- a GUI with saved profiles
+- click-to-reposition calibration
 
-    ; 3) move to a field / map area
-    DoRandomClick(1040, 200)
-    Sleep RandomBetween(900, 1700)
-
-    ; 4) trigger a second action (replace with in-game keybinds you need)
-    SendInput "{q}"
-    Sleep RandomBetween(350, 800)
-
-    ; 5) small extra action to keep the loop active
-    SendInput "{g}"
-    Sleep RandomBetween(1200, 2000)
-}
-
-RandomBetween(minVal, maxVal) {
-    return minVal + (maxVal - minVal) * Random()
-}
-
-DoRandomClick(x, y) {
-    x += RandomBetween(-18, 18)
-    y += RandomBetween(-18, 18)
-    MouseMove x, y, 15
-    Sleep RandomBetween(40, 120)
-    Click
-}
-
-; Optional: show a tray menu for quick control.
-Menu Tray, NoStandard
-Menu Tray, Add, Toggle Macro, ToggleMacro
-Menu Tray, Add, Exit, ExitApp
-Menu Tray, Default, Toggle Macro
-
-ExitApp(*) {
-    ExitApp
-}

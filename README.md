@@ -1,35 +1,222 @@
-# Bee Swarm Simulation Macro
+#Requires AutoHotkey v2.0
+#SingleInstance Force
+SetTitleMatchMode 2
+CoordMode "Mouse", "Screen"
 
-This repository contains a starter AutoHotkey macro for a Bee Swarm Simulator-style workflow.
+; ==========================================
+; Bee Swarm Macro (AutoHotkey v2 template)
+; ==========================================
+; - Press Ctrl+Alt+M to toggle the macro.
+; - Press Ctrl+Alt+S to open or hide the settings window.
+; - Adjust values here for your game window and layout.
 
-What is included
-- `bee_swarm_macro.ahk` — a simple toggled macro script
-- This README — setup notes and customization guidance
+global MacroEnabled := false
+global SettingsGui := ""
+global CurrentCycle := 0
 
-Important notes
-- This is a general template, not a guaranteed working script for every game client or screen layout.
-- You may need to adjust the window name, click coordinates, and keybinds to match your setup.
-- Use at your own risk and only on systems/accounts you own and are allowed to automate.
+global GameWindowTitle := "Roblox"
+global FocusWindowBeforeActions := true
 
-How to use
-1. Install AutoHotkey v2 from https://www.autohotkey.com/
-2. Open `bee_swarm_macro.ahk` in AutoHotkey.
-3. Update the values at the top of the script:
-   - `GameWindowTitle` (example: `Roblox`)
-   - the click coordinates
-   - the keys used for actions such as `e`, `q`, and `g`
-4. Press `Ctrl + Alt + M` to toggle the macro on/off.
+global CollectionPoints := [
+    [560, 310],
+    [700, 300],
+    [820, 260],
+    [970, 270],
+    [1080, 355],
+    [910, 420]
+]
 
-Suggested customization
-- Change `DoRandomClick(560, 310)` and `DoRandomClick(1040, 200)` to match your game screen layout.
-- Add more actions if you want a more advanced loop.
-- Add delays and randomization for better timing.
+global FieldPoints := [
+    [1000, 200],
+    [900, 245],
+    [810, 290],
+    [980, 360],
+    [1100, 240]
+]
 
-Example workflow
-- click a pollen collection area
-- trigger an action key
-- move to a new field or route
-- trigger a second action
-- repeat
+global ActionKeys := ["{e}", "{q}", "{g}", "{f}"]
 
-This file is intentionally simple so it can be adapted to your exact gameplay flow.
+global MinClickDelayMs := 120
+global MaxClickDelayMs := 420
+global MinActionDelayMs := 280
+global MaxActionDelayMs := 980
+global MinFieldDelayMs := 1100
+global MaxFieldDelayMs := 2600
+global LoopDelayMs := 250
+
+^!m::ToggleMacro()
+^!s:: ToggleSettingsGui()
+
+ToggleMacro() {
+    global MacroEnabled
+    MacroEnabled := !MacroEnabled
+
+    if (MacroEnabled) {
+        StartMacro()
+    } else {
+        StopMacro()
+    }
+}
+
+StartMacro() {
+    global MacroEnabled
+    MacroEnabled := true
+    TrayTip "Bee Swarm Macro", "Enabled — Ctrl+Alt+M to stop.", 10, 1
+    SetTimer RunMacroLoop, LoopDelayMs
+}
+
+StopMacro() {
+    global MacroEnabled
+    MacroEnabled := false
+    SetTimer RunMacroLoop, 0
+    TrayTip "Bee Swarm Macro", "Disabled.", 10, 1
+}
+
+ToggleSettingsGui() {
+    if (SettingsGui = "") {
+        CreateSettingsGui()
+    }
+
+    if (WinExist("Bee Swarm Macro Settings")) {
+        if (WinActive("Bee Swarm Macro Settings")) {
+            SettingsGui.Hide()
+        } else {
+            SettingsGui.Show("AutoSize")
+            WinActivate("Bee Swarm Macro Settings")
+        }
+    } else {
+        SettingsGui.Show("AutoSize")
+    }
+}
+
+RunMacroLoop() {
+    global MacroEnabled
+    if (!MacroEnabled) {
+        return
+    }
+
+    ExecuteMacroCycle()
+}
+
+ExecuteMacroCycle() {
+    global CurrentCycle, GameWindowTitle, FocusWindowBeforeActions, CollectionPoints, FieldPoints, ActionKeys
+
+    if (FocusWindowBeforeActions) {
+        TryFocusWindow(GameWindowTitle)
+    }
+
+    CurrentCycle += 1
+
+    ; Step 1: visit a collection point
+    point := CollectionPoints[RandomIndex(CollectionPoints.Length)]
+    MoveAndClick(point[1], point[2])
+    Sleep RandomBetween(MinClickDelayMs, MaxClickDelayMs)
+
+    ; Step 2: trigger a random action key
+    key := ActionKeys[RandomIndex(ActionKeys.Length)]
+    SendInput key
+    Sleep RandomBetween(MinActionDelayMs, MaxActionDelayMs)
+
+    ; Step 3: move to a field / route focus point
+    fieldPoint := FieldPoints[RandomIndex(FieldPoints.Length)]
+    MoveAndClick(fieldPoint[1], fieldPoint[2])
+    Sleep RandomBetween(MinFieldDelayMs, MaxFieldDelayMs)
+
+    ; Step 4: trigger a second random action
+    key2 := ActionKeys[RandomIndex(ActionKeys.Length)]
+    SendInput key2
+    Sleep RandomBetween(MinActionDelayMs, MaxActionDelayMs)
+
+    ; Step 5: small idle movement to simulate active gameplay
+    ; Optional: remove or replace these clicks to fit your exact in-game routine.
+    idlePoint := CollectionPoints[RandomIndex(CollectionPoints.Length)]
+    MoveAndClick(idlePoint[1], idlePoint[2])
+    Sleep RandomBetween(200, 600)
+
+    ; Optional extra movement to keep the loop looking natural
+    if (Mod(CurrentCycle, 3) = 0) {
+        SendInput "{space}"
+        Sleep RandomBetween(200, 500)
+    }
+}
+
+TryFocusWindow(windowTitle) {
+    if (WinExist(windowTitle)) {
+        WinActivate(windowTitle)
+        WinWaitActive(windowTitle, , 2)
+    }
+}
+
+MoveAndClick(x, y) {
+    x += RandomBetween(-18, 18)
+    y += RandomBetween(-18, 18)
+    MouseMove x, y, 12
+    Sleep RandomBetween(30, 120)
+    Click
+}
+
+RandomBetween(minVal, maxVal) {
+    return minVal + (maxVal - minVal) * Random()
+}
+
+RandomIndex(length) {
+    return Random(1, length)
+}
+
+CreateSettingsGui() {
+    global SettingsGui, GameWindowTitle, FocusWindowBeforeActions, LoopDelayMs
+
+    SettingsGui := Gui("+AlwaysOnTop +ToolWindow", "Bee Swarm Macro Settings")
+    SettingsGui.SetFont("s10")
+    SettingsGui.AddText(, "Game Window Title")
+    SettingsGui.AddEdit("w180 vGameWindowTitle", GameWindowTitle)
+    SettingsGui.AddCheckbox("vFocusWindowBeforeActions Checked", "Focus game before actions")
+    SettingsGui.AddText(, "Loop Delay (ms)")
+    SettingsGui.AddEdit("w180 vLoopDelayMs", LoopDelayMs)
+    SettingsGui.AddButton("w80", "Apply").OnEvent("Click", ApplySettings)
+    SettingsGui.AddButton("w80 x+10", "Close").OnEvent("Click", CloseSettings)
+    SettingsGui.OnEvent("Close", CloseSettings)
+    SettingsGui.Show("AutoSize")
+}
+
+ApplySettings(*) {
+    global SettingsGui, GameWindowTitle, FocusWindowBeforeActions, LoopDelayMs, MacroEnabled
+
+    SettingsGui.Submit()
+
+    GameWindowTitle := SettingsGui['GameWindowTitle'].Text
+    FocusWindowBeforeActions := SettingsGui['FocusWindowBeforeActions']
+    LoopDelayMs := Integer(SettingsGui['LoopDelayMs'])
+
+    if (LoopDelayMs < 100) {
+        LoopDelayMs := 100
+    }
+
+    if (MacroEnabled) {
+        SetTimer RunMacroLoop, 0
+        SetTimer RunMacroLoop, LoopDelayMs
+    }
+
+    TrayTip "Bee Swarm Macro", "Settings saved.", 5, 1
+}
+
+CloseSettings(*) {
+    global SettingsGui
+    if (SettingsGui != "") {
+        SettingsGui.Hide()
+    }
+}
+
+Menu Tray, NoStandard
+Menu Tray, Add, Toggle Macro, ToggleMacro
+Menu Tray, Add, Settings, ToggleSettingsGui
+Menu Tray, Add, Exit, ExitApp
+Menu Tray, Default, Toggle Macro
+
+ExitApp(*) {
+    ExitApp
+}
+
+; Optional: run the settings gui immediately for convenience when script starts.
+CreateSettingsGui()
+TrayTip "Bee Swarm Macro", "Ready — Ctrl+Alt+M to start.", 5, 1
