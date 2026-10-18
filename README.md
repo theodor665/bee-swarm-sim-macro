@@ -6,8 +6,8 @@ CoordMode "Mouse", "Screen"
 ; ==========================================
 ; Bee Swarm Macro (AutoHotkey v2 template)
 ; ==========================================
-; - Press Ctrl+Alt+M to toggle the macro.
-; - Press Ctrl+Alt+S to open or hide the settings window.
+; - Press F1 to toggle the macro.
+; - Press F2 to open or hide the settings window.
 ; - Adjust values here for your game window and layout.
 
 global MacroEnabled := false
@@ -44,8 +44,8 @@ global MinFieldDelayMs := 1100
 global MaxFieldDelayMs := 2600
 global LoopDelayMs := 250
 
-^!m::ToggleMacro()
-^!s:: ToggleSettingsGui()
+F1::ToggleMacro()
+F2:: ToggleSettingsGui()
 
 ToggleMacro() {
     global MacroEnabled
@@ -61,7 +61,7 @@ ToggleMacro() {
 StartMacro() {
     global MacroEnabled
     MacroEnabled := true
-    TrayTip "Bee Swarm Macro", "Enabled — Ctrl+Alt+M to stop.", 10, 1
+    TrayTip "Bee Swarm Macro", "Enabled — F1 to stop.", 10, 1
     SetTimer RunMacroLoop, LoopDelayMs
 }
 
@@ -128,7 +128,6 @@ ExecuteMacroCycle() {
     Sleep RandomBetween(MinActionDelayMs, MaxActionDelayMs)
 
     ; Step 5: small idle movement to simulate active gameplay
-    ; Optional: remove or replace these clicks to fit your exact in-game routine.
     idlePoint := CollectionPoints[RandomIndex(CollectionPoints.Length)]
     MoveAndClick(idlePoint[1], idlePoint[2])
     Sleep RandomBetween(200, 600)
@@ -219,4 +218,4 @@ ExitApp(*) {
 
 ; Optional: run the settings gui immediately for convenience when script starts.
 CreateSettingsGui()
-TrayTip "Bee Swarm Macro", "Ready — Ctrl+Alt+M to start.", 5, 1
+TrayTip "Bee Swarm Macro", "Ready — F1 to start.", 5, 1

@@ -21,8 +21,8 @@ How to use
    - `FieldPoints`
    - `ActionKeys`
    - timing values such as `MinActionDelayMs` and `MaxFieldDelayMs`
-4. Press `Ctrl + Alt + M` to toggle the macro on/off.
-5. Press `Ctrl + Alt + S` to open the settings window.
+4. Press `F1` to toggle the macro on/off.
+5. Press `F2` to open the settings window.
 
 What the script does
 - focuses the game window when enabled
